@@ -1,37 +1,40 @@
-<!DOCTYPE html>
-<html><body>
 <?php
 include ('conn.php');
+// If you change this value, the ESP32 sketch needs to match
+$api_key_value = "123456789";
 
-$sql = "SELECT id, temperature, humidity, created_date FROM esp_data ORDER BY id DESC";
+$api_key= $temperature = $humidity = "";
 
-echo '<table cellspacing="5" cellpadding="5">
-      <tr> 
-        <td>ID</td> 
-        <td>Value 1</td> 
-        <td>Value 2</td>
-        <td>Timestamp</td> 
-      </tr>';
- 
-if ($result = $conn->query($sql)) {
-    while ($row = $result->fetch_assoc()) {
-        $row_id = $row["id"];
-        $row_value1 = $row["temperature"];
-        $row_value2 = $row["humidity"]; 
-        $row_reading_time = $row["created_date"];
-      
-        echo '<tr> 
-                <td>' . $row_id . '</td> 
-                <td>' . $row_value1 . '</td> 
-                <td>' . $row_value2 . '</td>
-                <td>' . $row_reading_time . '</td> 
-              </tr>';
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $api_key = pst_input($_POST["api_key"]);
+    if($api_key == $api_key_value) {
+        $temperature = pst_input($_POST["temperature"]);
+        $humidity = pst_input($_POST["humidity"]);
+        
+        $sql = "INSERT INTO esp_data (temperature, humidity, created_date)
+        VALUES ('" . $temperature . "', '" . $humidity . "', '".date("Y-m-d H:i:s")."')";
+        
+        if ($conn->query($sql) === TRUE) {
+            echo "New record created successfully";
+        } 
+        else {
+            echo "Error: " . $sql . "<br>" . $conn->error;
+        }
+    
+        $conn->close();
     }
-    $result->free();
+    else {
+        echo "Wrong API Key provided.";
+    }
+
+}
+else {
+    echo "No data posted with HTTP POST.";
 }
 
-$conn->close();
-?> 
-</table>
-</body>
-</html>
+function pst_input($data) {
+    $data = trim($data);
+    $data = stripslashes($data);
+    $data = htmlspecialchars($data);
+    return $data;
+}
