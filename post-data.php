@@ -3,7 +3,7 @@
 <?php
 include ('conn.php');
 
-$sql = "SELECT id, temperature, humidity, created_date FROM GS_fridge ORDER BY id DESC";
+$sql = "SELECT id, temperature, humidity, created_date FROM esp_data ORDER BY id DESC";
 
 echo '<table cellspacing="5" cellpadding="5">
       <tr> 
